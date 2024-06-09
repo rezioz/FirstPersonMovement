@@ -14,6 +14,8 @@ public class PlayerMove : MonoBehaviour
 
     [SerializeField] float slopeForceRayLength;
 
+    [SerializeField] BoxCollider groundCollider;
+
     CharacterController Controller;
 
     Vector3 CurrentMoveVelocity;
@@ -84,8 +86,9 @@ public class PlayerMove : MonoBehaviour
         
         Controller.Move(CurrentMoveVelocity * Time.deltaTime);
 
-        if(IsOnSlope() && PlayerInput != Vector3.zero)
+        if(IsOnSlope() && PlayerInput != Vector3.zero &&CurrentForceVelocity.y<=0)
         {
+            print("slpoe adaptation");
             Controller.Move(Vector3.down);
         }
         else
@@ -101,17 +104,27 @@ public class PlayerMove : MonoBehaviour
     {
 
 
-        Ray groundCheckRay = new Ray(transform.position, Vector3.down);
-        if (Physics.Raycast(groundCheckRay, .25f ,LayerMask.NameToLayer("Player")))
+        RaycastHit hit;
+        float sphereRadius = .5f;
+        float sphereCastDistance = .1f;
+        int playerLayerMask = LayerMask.GetMask("Player");
+
+        //Debug.Log("Casting SphereCast from position: " + transform.position + " with radius: " + sphereRadius + " and distance: " + sphereCastDistance);
+
+        if (Physics.SphereCast(transform.position+.5f*Vector3.up, sphereRadius, Vector3.down, out hit, sphereCastDistance))
         {
-            if(CurrentForceVelocity.y<0)
+            Debug.Log("SphereCast hit: " + hit.collider.name);
+
+            if (CurrentForceVelocity.y < 0)
+            {
                 CurrentForceVelocity.y = 0;
+                //Controller.Move(Vector3.down);
+            }
 
             if (Input.GetKeyDown(KeyCode.Space))
             {
                 CurrentForceVelocity.y = JumpStrength;
             }
-            
         }
         else
         {
@@ -122,10 +135,44 @@ public class PlayerMove : MonoBehaviour
         //rb.AddForce(CurrentForceVelocity);
     }
 
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+        Vector3 origin = transform.position;
+        Vector3 direction = Vector3.down * .25f;
+
+        // Draw the initial sphere at the origin of the SphereCast
+        Gizmos.DrawSphere(origin, .25f);
+
+        // Draw the line in the direction of the SphereCast
+        Gizmos.DrawLine(origin, origin + direction);
+
+        // Draw the sphere at the end of the SphereCast
+        Gizmos.DrawSphere(origin + direction, .25f);
+    }
+
     bool IsOnGround()
     {
+        /*
         Ray groundCheckRay = new Ray(transform.position, Vector3.down);
         return CurrentForceVelocity.y == 0 && (Physics.Raycast(groundCheckRay, .25f, LayerMask.NameToLayer("Player")));
+        */
+
+        RaycastHit hit;
+        float sphereRadius = .5f;
+        float sphereCastDistance = .1f;
+        int playerLayerMask = LayerMask.GetMask("Player");
+
+        //Debug.Log("Casting SphereCast from position: " + transform.position + " with radius: " + sphereRadius + " and distance: " + sphereCastDistance);
+
+        if (Physics.SphereCast(transform.position + .5f * Vector3.up, sphereRadius, Vector3.down, out hit, sphereCastDistance))
+        {
+
+            return true;
+        }
+
+        return false;
     }
 
     bool IsOnSlope()
@@ -135,10 +182,12 @@ public class PlayerMove : MonoBehaviour
 
         RaycastHit hit;
 
-        if (Physics.Raycast(transform.position, transform.up * -1, out hit, slopeForceRayLength, LayerMask.NameToLayer("Player")))
+        if (Physics.Raycast(transform.position, transform.up * -1, out hit, slopeForceRayLength, ~LayerMask.NameToLayer("Player")))
+        {
+            print(hit.collider.transform.name);
             if (hit.normal != Vector3.up)
                 return true;
-
+        }
 
         return false;
 
@@ -153,6 +202,14 @@ public class PlayerMove : MonoBehaviour
             {
                 Controller.Move(hit.collider.gameObject.GetComponent<moveStuff>().movement*Time.deltaTime);
             }
+        }
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if(collision.collider == groundCollider)
+        {
+
         }
     }
 

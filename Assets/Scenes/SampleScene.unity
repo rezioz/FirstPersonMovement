@@ -10355,6 +10355,16 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5795484947646327248, guid: 7db5addf08b359649b08bacfb012737c,
         type: 3}
+      propertyPath: mode
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5795484947646327248, guid: 7db5addf08b359649b08bacfb012737c,
+        type: 3}
+      propertyPath: oneWay
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5795484947646327248, guid: 7db5addf08b359649b08bacfb012737c,
+        type: 3}
       propertyPath: waitTime
       value: 0.5
       objectReference: {fileID: 0}
@@ -10366,7 +10376,7 @@ PrefabInstance:
     - target: {fileID: 8065439237526766425, guid: 7db5addf08b359649b08bacfb012737c,
         type: 3}
       propertyPath: m_IsTrigger
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

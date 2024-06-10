@@ -9,11 +9,24 @@ public class TriggerObjectMovement : MonoBehaviour, IInteractable
     [SerializeField] Vector3 Destination;
     [SerializeField] float duration;
     [SerializeField] float waitTime;
+
+
+    
+    enum modes
+    {
+        backAndForth,
+        oneWay,
+        twoInteraction,
+    }
+
+    [SerializeField] modes mode;
+
     Vector3 totalMovement;
     Vector3 initialPos;
     float timing = 0;
     bool triggered = false;
     bool inMovement = false;
+    bool waitForSecondInteraction=false;
 
     // Start is called before the first frame update
     void Start()
@@ -42,7 +55,12 @@ public class TriggerObjectMovement : MonoBehaviour, IInteractable
         yield return new WaitForSeconds(duration);
         objectToTrigger.movement = Vector3.zero;
         objectToTrigger.transform.position = Destination;
-        StartCoroutine(movedWait());
+        switch (mode)
+        {
+            case modes.backAndForth:StartCoroutine(movedWait());break;
+            case modes.oneWay: break;
+            case modes.twoInteraction: waitForSecondInteraction = true; inMovement = false; break;
+        }
     }
 
     IEnumerator movedWait()
@@ -51,10 +69,11 @@ public class TriggerObjectMovement : MonoBehaviour, IInteractable
         goingBack();
     }
 
-    
+
 
     void goingBack()
     {
+        inMovement = true;
         objectToTrigger.movement = -totalMovement * (duration);
         timing -= Time.deltaTime;
 
@@ -76,7 +95,13 @@ public class TriggerObjectMovement : MonoBehaviour, IInteractable
             triggered = true;
             if (!inMovement)
             {
-                goingOn();
+                if (waitForSecondInteraction)
+                {
+                    waitForSecondInteraction = false;
+                    goingBack();
+                }
+                else
+                    goingOn();
             }
         }
     }
@@ -93,7 +118,13 @@ public class TriggerObjectMovement : MonoBehaviour, IInteractable
     {
         if (!GetComponent<BoxCollider>().isTrigger && !inMovement)
         {
-            goingOn();
+            if (waitForSecondInteraction)
+            {
+                waitForSecondInteraction = false;
+                goingBack();
+            }
+            else
+                goingOn();
         }
     }
 }

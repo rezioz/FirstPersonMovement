@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TriggerObjectMovement : MonoBehaviour
+public class TriggerObjectMovement : MonoBehaviour, IInteractable
 {
 
     [SerializeField] moveStuff objectToTrigger;
@@ -71,7 +71,7 @@ public class TriggerObjectMovement : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if(other.gameObject.layer == LayerMask.NameToLayer("Player"))
+        if(GetComponent<BoxCollider>().isTrigger && other.gameObject.layer == LayerMask.NameToLayer("Player"))
         {
             triggered = true;
             if (!inMovement)
@@ -83,9 +83,17 @@ public class TriggerObjectMovement : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.gameObject.layer == LayerMask.NameToLayer("Player"))
+        if (GetComponent<BoxCollider>().isTrigger && other.gameObject.layer == LayerMask.NameToLayer("Player"))
         {
             triggered = false;
+        }
+    }
+
+    public void Interact()
+    {
+        if (!GetComponent<BoxCollider>().isTrigger && !inMovement)
+        {
+            goingOn();
         }
     }
 }
